@@ -21,8 +21,8 @@ import edu.usc.cs587.examples.objects.UserMessage;
 public class DatabaseHandler {
 	private static final String HOST = "128.125.163.168";
 	private static final String PORT = "1521";
-	private static final String USERNAME = "team25";   
-	private static final String PASSWORD = "InfoLab999";
+	private static final String USERNAME = "team17";   
+	private static final String PASSWORD = "palhunter";
 	private static final String DBNAME = "csci585";
 	private static final String URL = "jdbc:oracle:thin:@";
 
@@ -77,6 +77,27 @@ public class DatabaseHandler {
 		}
 	}
 	
+	public boolean insertPeopleToDB(int pid, String first_name, String last_name, String created_date) {
+		if (this.connection == null) {
+			return false;
+		}
+		String sqlStmt = "INSERT INTO PEOPLE VALUES (?,?,?,to_date(?,'yyyy/mm/dd:hh:mi:ssam'))";
+		try {
+			PreparedStatement pstmt = this.connection.prepareStatement(sqlStmt);
+			
+			pstmt.setInt(1, pid);
+			pstmt.setString(2, first_name);
+			pstmt.setString(3, last_name);
+			pstmt.setString(4, created_date);
+			pstmt.execute();
+			pstmt.close();
+			return true;
+		}catch (SQLException ex) {
+			ex.printStackTrace();
+			return false;
+		}
+	}
+	
 	public List<UserMessage> retrieveAllRecords () {
 		if (this.connection == null) {
 			return null;
@@ -109,11 +130,11 @@ public class DatabaseHandler {
 			//insert an record to the database table 
 //			handler.insertRecordToDB("Ling Hu", "Helloworld!!", System.currentTimeMillis());
 			//retrieve all records from the database table 
-			List<UserMessage> results = handler.retrieveAllRecords();
-			for (UserMessage ret : results) {
-				System.out.println(ret.getUsername()+"\t"+ ret.getMessage()+"\t"
-						+Constants.getTimeAsString(ret.getPubdate()));
-			}
+			String first_name = "Luan";
+			String last_name = "Nguyen";
+			int id = 1;
+			String created_date ="1998/05/31:12:00:00AM";
+			handler.insertPeopleToDB(id, first_name, last_name,created_date);
 			handler.closeConnection();
 		} catch (Exception e) {
 			e.printStackTrace();

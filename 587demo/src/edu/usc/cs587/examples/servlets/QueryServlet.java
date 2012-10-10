@@ -51,18 +51,26 @@ public class QueryServlet extends HttpServlet{
 			response.setContentType("text/html;charset=UTF-8");           
 	        response.setHeader("Cache-Control", "no-cache");
 
+			String first_name = req.getParameter("first_name");
+			String last_name = req.getParameter("last_name");
+			String pid = req.getParameter("id");
+			int id = Integer.parseInt(pid);
+			String created_date ="1998/05/31:12:00:00AM";
+			handler.insertPeopleToDB(id, first_name, last_name,created_date);
+			
+			
 			PrintWriter out = response.getWriter();
 			String resultString = "";
-			List<UserMessage> ret = handler.retrieveAllRecords();
-			if (ret.size() == 0) {
-				
-			}else {
-				Gson gson = new Gson();
-				resultString = gson.toJson(ret);
-			}
+			//List<UserMessage> ret = handler.retrieveAllRecords();
+//			if (ret.size() == 0) {
+//				
+//			}else {
+//				Gson gson = new Gson();
+//				resultString = gson.toJson(ret);
+//			}
 			
-			System.out.println(resultString);
-			out.write(resultString);
+			System.out.println("heello world");
+			out.write("hello world");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
