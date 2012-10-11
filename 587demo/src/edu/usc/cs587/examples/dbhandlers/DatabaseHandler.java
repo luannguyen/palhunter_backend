@@ -98,6 +98,53 @@ public class DatabaseHandler {
 		}
 	}
 	
+	public String queryPeople(String id){
+		String table = "PEOPLE";
+		String sqlStmt =  "SELECT * FROM "+table+" where pid ="+id;
+		String rs = runQuery (sqlStmt, table);
+		return rs;
+	}
+	
+	public String convertPeopleToJSON(ResultSet rs){
+		if(rs == null) return "[]";
+		String result = "[";
+		try {
+			while (rs != null && rs.next()) {
+				result +="{";
+				result += "\"PID\":\""+rs.getInt("PID")+"\"";
+				result += ",\"FIRST_NAME\":\""+rs.getString("FIRST_NAME")+"\"";
+				result += ",\"LAST_NAME\":\""+rs.getString("LAST_NAME")+"\"";
+				result += ",\"CREATED_TIME\":\""+rs.getLong("CREATED_TIME")+"\"";
+				result +="}";
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		result+="]";
+		return result;
+	}
+	
+	public String runQuery (String sqlStmt, String table) {
+		ResultSet rs = null;
+		String result = "[]";
+		if (this.connection == null) {
+			return result;
+		}
+		try {
+			PreparedStatement pstmt = this.connection.prepareStatement(sqlStmt);
+			rs = pstmt.executeQuery();
+			if(table.compareTo("PEOPLE")==0)
+				result = convertPeopleToJSON(rs);
+			pstmt.close();
+			return result;
+		}catch (SQLException ex) {
+			ex.printStackTrace();
+			return result;
+		}
+	}
+	
+	
 	public List<UserMessage> retrieveAllRecords () {
 		if (this.connection == null) {
 			return null;

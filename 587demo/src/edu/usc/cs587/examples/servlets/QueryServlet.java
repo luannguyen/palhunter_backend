@@ -50,17 +50,27 @@ public class QueryServlet extends HttpServlet{
 //			response.setContentType("text/x-json;charset=UTF-8");           
 			response.setContentType("text/html;charset=UTF-8");           
 	        response.setHeader("Cache-Control", "no-cache");
-
-			String first_name = req.getParameter("first_name");
-			String last_name = req.getParameter("last_name");
-			String pid = req.getParameter("id");
-			int id = Integer.parseInt(pid);
-			long created_date = Long.parseLong(req.getParameter("created_date"));
-			System.out.println(created_date);
-			handler.insertPeopleToDB(id, first_name, last_name,created_date);
+	        PrintWriter out = response.getWriter();
+	        
+	        String action = req.getParameter("action");
+	        
+	        if(action.compareTo("insertPeople")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=2&first_name=yuwei&last_name=tan&created_time=1347774599449&action=insertPeople
+				String first_name = req.getParameter("first_name");
+				String last_name = req.getParameter("last_name");
+				String pid = req.getParameter("id");
+				int id = Integer.parseInt(pid);
+				long created_date = Long.parseLong(req.getParameter("created_time"));
+				System.out.println(created_date);
+				handler.insertPeopleToDB(id, first_name, last_name,created_date);
+	        } else if (action.compareTo("queryPeopleId")==0){
+	        	//example:  http://localhost:8080/587demo/QueryServlet?id=4&action=queryPeopleId
+	        	String pid = req.getParameter("id");
+	        	String result = handler.queryPeople(pid);
+	        	out.write(result);
+	        }
 			
 			
-			PrintWriter out = response.getWriter();
 			String resultString = "";
 			//List<UserMessage> ret = handler.retrieveAllRecords();
 //			if (ret.size() == 0) {
@@ -70,8 +80,8 @@ public class QueryServlet extends HttpServlet{
 //				resultString = gson.toJson(ret);
 //			}
 			
-			System.out.println("heello world");
-			out.write("hello world");
+			//System.out.println("heello world");
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
