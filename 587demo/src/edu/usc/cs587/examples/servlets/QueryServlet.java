@@ -55,7 +55,8 @@ public class QueryServlet extends HttpServlet{
 			String last_name = req.getParameter("last_name");
 			String pid = req.getParameter("id");
 			int id = Integer.parseInt(pid);
-			String created_date ="1998/05/31:12:00:00AM";
+			long created_date = Long.parseLong(req.getParameter("created_date"));
+			System.out.println(created_date);
 			handler.insertPeopleToDB(id, first_name, last_name,created_date);
 			
 			

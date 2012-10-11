@@ -77,18 +77,18 @@ public class DatabaseHandler {
 		}
 	}
 	
-	public boolean insertPeopleToDB(int pid, String first_name, String last_name, String created_date) {
+	public boolean insertPeopleToDB(int pid, String first_name, String last_name, long created_date) {
 		if (this.connection == null) {
 			return false;
 		}
-		String sqlStmt = "INSERT INTO PEOPLE VALUES (?,?,?,to_date(?,'yyyy/mm/dd:hh:mi:ssam'))";
+		String sqlStmt = "INSERT INTO PEOPLE VALUES (?,?,?,?)";
 		try {
 			PreparedStatement pstmt = this.connection.prepareStatement(sqlStmt);
 			
 			pstmt.setInt(1, pid);
 			pstmt.setString(2, first_name);
 			pstmt.setString(3, last_name);
-			pstmt.setString(4, created_date);
+			pstmt.setLong(4, created_date);
 			pstmt.execute();
 			pstmt.close();
 			return true;
@@ -133,7 +133,7 @@ public class DatabaseHandler {
 			String first_name = "Luan";
 			String last_name = "Nguyen";
 			int id = 1;
-			String created_date ="1998/05/31:12:00:00AM";
+			long created_date = Long.parseLong("1347774599443");;
 			handler.insertPeopleToDB(id, first_name, last_name,created_date);
 			handler.closeConnection();
 		} catch (Exception e) {
