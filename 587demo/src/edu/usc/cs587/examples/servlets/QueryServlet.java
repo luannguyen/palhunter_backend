@@ -64,11 +64,17 @@ public class QueryServlet extends HttpServlet{
 				System.out.println(created_date);
 				handler.insertPeopleToDB(id, first_name, last_name,created_date);
 	        } else if (action.compareTo("queryPeopleId")==0){
-	        	//example:  http://localhost:8080/587demo/QueryServlet?id=4&action=queryPeopleId
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPeopleId
 	        	String pid = req.getParameter("id");
 	        	String result = handler.queryPeople(pid);
 	        	out.write(result);
-	        }
+	        } else if (action.compareTo("queryPeopleName")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?first_name=yuwei&last_name=tan&action=queryPeopleName
+				String first_name = req.getParameter("first_name");
+				String last_name = req.getParameter("last_name");
+	        	String result = handler.queryPeopleName(first_name,last_name);
+	        	out.write(result);
+	        } 
 			
 			
 			String resultString = "";

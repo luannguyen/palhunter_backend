@@ -98,6 +98,13 @@ public class DatabaseHandler {
 		}
 	}
 	
+	public String queryPeopleName(String first_name, String last_name){
+		String table = "PEOPLE";
+		String sqlStmt =  "SELECT * FROM "+table+" where first_name ='"+first_name+"' and last_name ='"+last_name+"'";
+		String rs = runQuery (sqlStmt, table);
+		return rs;
+	}
+	
 	public String queryPeople(String id){
 		String table = "PEOPLE";
 		String sqlStmt =  "SELECT * FROM "+table+" where pid ="+id;
