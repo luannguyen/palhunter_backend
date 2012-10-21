@@ -63,12 +63,40 @@ public class QueryServlet extends HttpServlet{
 				long created_date = Long.parseLong(req.getParameter("created_time"));
 				System.out.println(created_date);
 				handler.insertPeopleToDB(id, first_name, last_name,created_date);
+	        } else if (action.compareTo("addFriend")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?action=addFriend&pid1=1&pid2=4
+	        	String pid1 = req.getParameter("pid1");
+	        	String pid2 = req.getParameter("pid2");
+	        	boolean success = handler.addFriend(pid1,pid2);
+	        	if(success)
+	        		out.write("Successfully insert!");
+	        	else
+	        		out.write("Failed to insert!");
 	        } else if (action.compareTo("queryPeopleId")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPeopleId
 	        	String pid = req.getParameter("id");
 	        	String result = handler.queryPeople(pid);
 	        	out.write(result);
-	        } else if (action.compareTo("queryPeopleName")==0){
+	        } else if (action.compareTo("queryPastLocations")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPastLocations
+	        	String pid = req.getParameter("id");
+	        	String result = handler.queryPastLocations(pid);
+	        	out.write(result);
+	        }else if (action.compareTo("findAllFriends")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=12&action=findAllFriends
+	        	String pid = req.getParameter("id");
+	        	String result = handler.findAllFriends(pid);
+	        	out.write(result);
+	        }else if (action.compareTo("findAllNonFriends")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=12&action=findAllNonFriends
+	        	String pid = req.getParameter("id");
+	        	String result = handler.findAllNonFriends(pid);
+	        	out.write(result);
+	        }else if (action.compareTo("findAllPeople")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?action=findAllPeople
+	        	String result = handler.findAllPeople();
+	        	out.write(result);
+	        }else if (action.compareTo("queryPeopleName")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?first_name=yuwei&last_name=tan&action=queryPeopleName
 				String first_name = req.getParameter("first_name");
 				String last_name = req.getParameter("last_name");

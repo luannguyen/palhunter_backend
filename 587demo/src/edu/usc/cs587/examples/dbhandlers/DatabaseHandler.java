@@ -57,19 +57,23 @@ public class DatabaseHandler {
 		return this.connection == null;
 	}
 	
-	public boolean insertRecordToDB(String username, String randomstring, long pubdate) {
+	public boolean addFriend(String pid1, String pid2) {
 		if (this.connection == null) {
 			return false;
 		}
-		String sqlStmt = "INSERT INTO EXAMPLE VALUES (?,?,?)";
+		String sqlStmt = "INSERT INTO RELATIONSHIP(pid1,pid2) VALUES (?,?)";
 		try {
 			PreparedStatement pstmt = this.connection.prepareStatement(sqlStmt);
-			
-			pstmt.setString(1, username);
-			pstmt.setString(2, randomstring);
-			pstmt.setLong  (3, pubdate);
+			PreparedStatement pstmt2 = this.connection.prepareStatement(sqlStmt);
+			pstmt.setString(1, pid1);
+			pstmt.setString(2, pid2);
 			pstmt.execute();
 			pstmt.close();
+			
+			pstmt2.setString(1, pid2);
+			pstmt2.setString(2, pid1);
+			pstmt2.execute();
+			pstmt2.close();
 			return true;
 		}catch (SQLException ex) {
 			ex.printStackTrace();
@@ -105,12 +109,42 @@ public class DatabaseHandler {
 		return rs;
 	}
 	
+	public String findAllPeople(){
+		String table = "PEOPLE";
+		String sqlStmt =  "SELECT * FROM "+table;
+		String rs = runQuery (sqlStmt, table);
+		return rs;
+	}
+	
+	public String findAllFriends(String id){
+		String table = "PEOPLE";
+		String sqlStmt =  "SELECT * FROM PEOPLE WHERE PID IN (select PID2 from RELATIONSHIP WHERE PID1="+id+")";
+		String rs = runQuery (sqlStmt, table);
+		return rs;
+	}
+	
+	public String findAllNonFriends(String id){
+		String table = "PEOPLE";
+		String sqlStmt =  "SELECT * FROM PEOPLE WHERE PID NOT IN (select PID2 from RELATIONSHIP WHERE PID1="+id+") and PID !="+id;
+		System.out.println(sqlStmt);
+		String rs = runQuery (sqlStmt, table);
+		return rs;
+	}
+	
 	public String queryPeople(String id){
 		String table = "PEOPLE";
 		String sqlStmt =  "SELECT * FROM "+table+" where pid ="+id;
 		String rs = runQuery (sqlStmt, table);
 		return rs;
 	}
+	
+	public String queryPastLocations(String id){
+		String table = "LOCATION";
+		String sqlStmt =  "SELECT * FROM "+table+" where pid ="+id;
+		String rs = runQuery (sqlStmt, table);
+		return rs;
+	}
+	
 	
 	public String convertPeopleToJSON(ResultSet rs){
 		if(rs == null) return "[]";
@@ -132,6 +166,26 @@ public class DatabaseHandler {
 		return result;
 	}
 	
+	public String convertLocationToJSON(ResultSet rs){
+		if(rs == null) return "[]";
+		String result = "[";
+		try {
+			while (rs != null && rs.next()) {
+				result +="{";
+				result += "\"PID\":\""+rs.getInt("PID")+"\"";
+				result += ",\"LONG_INT\":\""+rs.getInt("LONG_INT")+"\"";
+				result += ",\"LAT_INT\":\""+rs.getInt("LAT_INT")+"\"";
+				result += ",\"UPDATED_TIME\":\""+rs.getLong("UPDATED_TIME")+"\"";
+				result +="}";
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		result+="]";
+		return result;
+	}
+	
 	public String runQuery (String sqlStmt, String table) {
 		ResultSet rs = null;
 		String result = "[]";
@@ -143,6 +197,8 @@ public class DatabaseHandler {
 			rs = pstmt.executeQuery();
 			if(table.compareTo("PEOPLE")==0)
 				result = convertPeopleToJSON(rs);
+			else if(table.compareTo("LOCATION")==0)
+				result = convertLocationToJSON(rs);
 			pstmt.close();
 			return result;
 		}catch (SQLException ex) {
