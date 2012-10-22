@@ -102,6 +102,27 @@ public class DatabaseHandler {
 		}
 	}
 	
+	public boolean insertLocation(int pid, long lat_int, long long_int, long created_date) {
+		if (this.connection == null) {
+			return false;
+		}
+		String sqlStmt = "INSERT INTO LOCATION VALUES (?,?,?,?)";
+		try {
+			PreparedStatement pstmt = this.connection.prepareStatement(sqlStmt);
+			
+			pstmt.setInt(1, pid);
+			pstmt.setLong(2, long_int);
+			pstmt.setLong(3, lat_int);
+			pstmt.setLong(4, created_date);
+			pstmt.execute();
+			pstmt.close();
+			return true;
+		}catch (SQLException ex) {
+			ex.printStackTrace();
+			return false;
+		}
+	}
+	
 	public String queryPeopleName(String first_name, String last_name){
 		String table = "PEOPLE";
 		String sqlStmt =  "SELECT * FROM "+table+" where first_name ='"+first_name+"' and last_name ='"+last_name+"'";
@@ -116,6 +137,14 @@ public class DatabaseHandler {
 		return rs;
 	}
 	
+	public String getTotalPeople(){
+		String table = "PEOPLE";
+		String action = "AGGREGATE";
+		String sqlStmt =  "SELECT COUNT(*) FROM "+table;
+		String rs = runQuery (sqlStmt, action);
+		return rs;
+	}
+	
 	public String findAllFriends(String id){
 		String table = "PEOPLE";
 		String sqlStmt =  "SELECT * FROM PEOPLE WHERE PID IN (select PID2 from RELATIONSHIP WHERE PID1="+id+")";
@@ -126,7 +155,6 @@ public class DatabaseHandler {
 	public String findAllNonFriends(String id){
 		String table = "PEOPLE";
 		String sqlStmt =  "SELECT * FROM PEOPLE WHERE PID NOT IN (select PID2 from RELATIONSHIP WHERE PID1="+id+") and PID !="+id;
-		System.out.println(sqlStmt);
 		String rs = runQuery (sqlStmt, table);
 		return rs;
 	}
@@ -186,6 +214,23 @@ public class DatabaseHandler {
 		return result;
 	}
 	
+	public String convertAggregateToJSON(ResultSet rs){
+		if(rs == null) return "[]";
+		String result = "[";
+		try {
+			while (rs != null && rs.next()) {
+				result +="{";
+				result += "\"TOTAL\":\""+rs.getInt(1)+"\"";
+				result +="}";
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		result+="]";
+		return result;
+	}
+	
 	public String runQuery (String sqlStmt, String table) {
 		ResultSet rs = null;
 		String result = "[]";
@@ -199,6 +244,8 @@ public class DatabaseHandler {
 				result = convertPeopleToJSON(rs);
 			else if(table.compareTo("LOCATION")==0)
 				result = convertLocationToJSON(rs);
+			else if(table.compareTo("AGGREGATE")==0)
+				result = convertAggregateToJSON(rs);
 			pstmt.close();
 			return result;
 		}catch (SQLException ex) {

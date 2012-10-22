@@ -61,8 +61,12 @@ public class QueryServlet extends HttpServlet{
 				String pid = req.getParameter("id");
 				int id = Integer.parseInt(pid);
 				long created_date = Long.parseLong(req.getParameter("created_time"));
-				System.out.println(created_date);
-				handler.insertPeopleToDB(id, first_name, last_name,created_date);
+				//System.out.println(created_date);
+				boolean success = handler.insertPeopleToDB(id, first_name, last_name,created_date);
+	        	if(success)
+	        		out.write("Successfully insert!");
+	        	else
+	        		out.write("Failed to insert!");
 	        } else if (action.compareTo("addFriend")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?action=addFriend&pid1=1&pid2=4
 	        	String pid1 = req.getParameter("pid1");
@@ -72,7 +76,18 @@ public class QueryServlet extends HttpServlet{
 	        		out.write("Successfully insert!");
 	        	else
 	        		out.write("Failed to insert!");
-	        } else if (action.compareTo("queryPeopleId")==0){
+	        } else if (action.compareTo("insertLocation")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?action=insertLocation&id=1&lat_int=41008331&long_int=-73829169&updated_time=1347774599449
+	        	int id = Integer.parseInt(req.getParameter("id"));
+	        	long lat_int = Long.parseLong(req.getParameter("lat_int"));
+	        	long long_int = Long.parseLong(req.getParameter("long_int"));
+	        	long updated_time = Long.parseLong(req.getParameter("updated_time"));
+	        	boolean success = handler.insertLocation(id,lat_int,long_int,updated_time);
+	        	if(success)
+	        		out.write("Successfully insert!");
+	        	else
+	        		out.write("Failed to insert!");
+	        }else if (action.compareTo("queryPeopleId")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPeopleId
 	        	String pid = req.getParameter("id");
 	        	String result = handler.queryPeople(pid);
@@ -95,6 +110,10 @@ public class QueryServlet extends HttpServlet{
 	        }else if (action.compareTo("findAllPeople")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?action=findAllPeople
 	        	String result = handler.findAllPeople();
+	        	out.write(result);
+	        }else if (action.compareTo("getTotalPeople")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?action=getTotalPeople
+	        	String result = handler.getTotalPeople();
 	        	out.write(result);
 	        }else if (action.compareTo("queryPeopleName")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?first_name=yuwei&last_name=tan&action=queryPeopleName
