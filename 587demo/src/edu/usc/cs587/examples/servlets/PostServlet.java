@@ -61,7 +61,7 @@ public class PostServlet extends HttpServlet{
 				+ " pubDate = "+Constants.getTimeAsString(pubDate));
 		//call method to write to the DB
 		DatabaseHandler handler = new DatabaseHandler ();
-		handler.insertRecordToDB(username, randomString, pubDate);
+		//handler.insertRecordToDB(username, randomString, pubDate);
 		handler.closeConnection();
 	}
 }

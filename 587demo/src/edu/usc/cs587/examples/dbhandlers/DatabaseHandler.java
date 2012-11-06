@@ -184,12 +184,14 @@ public class DatabaseHandler {
 				result += ",\"FIRST_NAME\":\""+rs.getString("FIRST_NAME")+"\"";
 				result += ",\"LAST_NAME\":\""+rs.getString("LAST_NAME")+"\"";
 				result += ",\"CREATED_TIME\":\""+rs.getLong("CREATED_TIME")+"\"";
-				result +="}";
+				result +="},";
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		if(result.length()>2)
+			result = result.substring(0, result.length()-1);
 		result+="]";
 		return result;
 	}
@@ -204,12 +206,14 @@ public class DatabaseHandler {
 				result += ",\"LONG_INT\":\""+rs.getInt("LONG_INT")+"\"";
 				result += ",\"LAT_INT\":\""+rs.getInt("LAT_INT")+"\"";
 				result += ",\"UPDATED_TIME\":\""+rs.getLong("UPDATED_TIME")+"\"";
-				result +="}";
+				result +="},";
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		if(result.length()>2)
+			result = result.substring(0, result.length()-1);
 		result+="]";
 		return result;
 	}
@@ -221,12 +225,14 @@ public class DatabaseHandler {
 			while (rs != null && rs.next()) {
 				result +="{";
 				result += "\"TOTAL\":\""+rs.getInt(1)+"\"";
-				result +="}";
+				result +="},";
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		if(result.length()>2)
+			result = result.substring(0, result.length()-1);
 		result+="]";
 		return result;
 	}
