@@ -71,12 +71,21 @@ public class QueryServlet extends HttpServlet{
 	        	//example: http://localhost:8080/587demo/QueryServlet?action=addFriend&pid1=1&pid2=4
 	        	String pid1 = req.getParameter("pid1");
 	        	String pid2 = req.getParameter("pid2");
-	        	boolean success = handler.addFriend(pid1,pid2);
+	        	boolean success = handler.addFriends(pid1,pid2);
 	        	if(success)
 	        		out.write("Successfully insert!");
 	        	else
 	        		out.write("Failed to insert!");
-	        } else if (action.compareTo("insertLocation")==0){
+	        } else if (action.compareTo("removeFriend")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?action=addFriend&pid1=1&pid2=4
+	        	String pid1 = req.getParameter("pid1");
+	        	String pid2 = req.getParameter("pid2");
+	        	boolean success = handler.removeFriends(pid1,pid2);
+	        	if(success)
+	        		out.write("Successfully Remove Friends!");
+	        	else
+	        		out.write("Failed to remove Friends!");
+	        }else if (action.compareTo("insertLocation")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?action=insertLocation&id=1&lat_int=41008331&long_int=-73829169&updated_time=1347774599449
 	        	int id = Integer.parseInt(req.getParameter("id"));
 	        	long lat_int = Long.parseLong(req.getParameter("lat_int"));
@@ -96,6 +105,11 @@ public class QueryServlet extends HttpServlet{
 	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPastLocations
 	        	String pid = req.getParameter("id");
 	        	String result = handler.queryPastLocations(pid);
+	        	out.write(result);
+	        }else if (action.compareTo("queryFriendsLocations")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPastLocations
+	        	String pid = req.getParameter("id");
+	        	String result = handler.queryFriendsLocations(pid);
 	        	out.write(result);
 	        }else if (action.compareTo("findAllFriends")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?id=12&action=findAllFriends

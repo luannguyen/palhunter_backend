@@ -57,11 +57,53 @@ public class DatabaseHandler {
 		return this.connection == null;
 	}
 	
+	public boolean addFriends(String pid1, String pid2) {
+		String[] pid2_arr = pid2.split(",");
+		for (String friend : pid2_arr){
+			boolean result = addFriend(pid1,friend);
+			if(!result) return false;
+		}
+		return true;
+	}
+	
+	public boolean removeFriends(String pid1, String pid2) {
+		String[] pid2_arr = pid2.split(",");
+		for (String friend : pid2_arr){
+			boolean result = removeFriend(pid1,friend);
+			if(!result) return false;
+		}
+		return true;
+	}
+	
 	public boolean addFriend(String pid1, String pid2) {
 		if (this.connection == null) {
 			return false;
 		}
 		String sqlStmt = "INSERT INTO RELATIONSHIP(pid1,pid2) VALUES (?,?)";
+		try {
+			PreparedStatement pstmt = this.connection.prepareStatement(sqlStmt);
+			PreparedStatement pstmt2 = this.connection.prepareStatement(sqlStmt);
+			pstmt.setString(1, pid1);
+			pstmt.setString(2, pid2);
+			pstmt.execute();
+			pstmt.close();
+			
+			pstmt2.setString(1, pid2);
+			pstmt2.setString(2, pid1);
+			pstmt2.execute();
+			pstmt2.close();
+			return true;
+		}catch (SQLException ex) {
+			ex.printStackTrace();
+			return false;
+		}
+	}
+	
+	public boolean removeFriend(String pid1, String pid2) {
+		if (this.connection == null) {
+			return false;
+		}
+		String sqlStmt = "DELETE FROM RELATIONSHIP WHERE pid1=? AND pid2=?";
 		try {
 			PreparedStatement pstmt = this.connection.prepareStatement(sqlStmt);
 			PreparedStatement pstmt2 = this.connection.prepareStatement(sqlStmt);
@@ -169,6 +211,13 @@ public class DatabaseHandler {
 	public String queryPastLocations(String id){
 		String table = "LOCATION";
 		String sqlStmt =  "SELECT * FROM "+table+" where pid ="+id;
+		String rs = runQuery (sqlStmt, table);
+		return rs;
+	}
+	
+	public String queryFriendsLocations(String id){
+		String table = "LOCATION";
+		String sqlStmt =  "SELECT * FROM "+table+" WHERE PID IN (select PID2 from RELATIONSHIP WHERE PID1="+id+")";
 		String rs = runQuery (sqlStmt, table);
 		return rs;
 	}
