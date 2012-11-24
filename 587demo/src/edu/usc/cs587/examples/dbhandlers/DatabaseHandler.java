@@ -236,6 +236,26 @@ public class DatabaseHandler {
 		return rs;
 	}
 	
+	public String queryFriendsLocationsWithinMiles(String id, String radius, String lat, String lon){
+		String table = "LOCATION";
+		String sqlStmt =  "SELECT l.PID, l.long_int, l.lat_int, l.updated_time FROM LOCATION l, (SELECT MAX(updated_time) as updated_time,PID FROM location WHERE PID IN (select PID2 from RELATIONSHIP WHERE PID1="+id+") GROUP by PID) loc where l.updated_time = loc.updated_time and l.pid = loc.pid";
+		double radius_d = Double.parseDouble(radius);
+		double lat_d = Integer.parseInt(lat)*0.000001;
+		double lon_d = Integer.parseInt(lon)*0.000001;
+		String rs = runQuerySpatialFilter (sqlStmt, radius_d, lat_d, lon_d);
+		return rs;
+	}
+	
+	public String queryFriendsPastLocationsWithinMiles(String id, String radius, String lat, String lon){
+		String table = "LOCATION";
+		String sqlStmt =  "SELECT * FROM "+table+" WHERE PID IN (select PID2 from RELATIONSHIP WHERE PID1="+id+")";
+		double radius_d = Double.parseDouble(radius);
+		double lat_d = Integer.parseInt(lat)*0.000001;
+		double lon_d = Integer.parseInt(lon)*0.000001;
+		String rs = runQuerySpatialFilter (sqlStmt, radius_d, lat_d, lon_d);
+		return rs;
+	}
+	
 	
 	public String convertPeopleToJSON(ResultSet rs){
 		if(rs == null) return "[]";
@@ -281,6 +301,32 @@ public class DatabaseHandler {
 		return result;
 	}
 	
+	public String convertLocationToJSONSpatialFilter(ResultSet rs, double radius, double lat, double lon){
+		if(rs == null) return "[]";
+		String result = "[";
+		try {
+			while (rs != null && rs.next()) {
+				double friend_lat = rs.getInt("LAT_INT") * 0.000001;
+				double friend_lon = rs.getInt("LONG_INT") * 0.000001;
+				if(HaverSineDistance(friend_lat, friend_lon, lat, lon)<=radius){
+					result +="{";
+					result += "\"PID\":\""+rs.getInt("PID")+"\"";
+					result += ",\"LONG_INT\":\""+rs.getInt("LONG_INT")+"\"";
+					result += ",\"LAT_INT\":\""+rs.getInt("LAT_INT")+"\"";
+					result += ",\"UPDATED_TIME\":\""+rs.getLong("UPDATED_TIME")+"\"";
+					result +="},";
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(result.length()>2)
+			result = result.substring(0, result.length()-1);
+		result+="]";
+		return result;
+	}
+	
 	public String convertAggregateToJSON(ResultSet rs){
 		if(rs == null) return "[]";
 		String result = "[";
@@ -298,6 +344,24 @@ public class DatabaseHandler {
 			result = result.substring(0, result.length()-1);
 		result+="]";
 		return result;
+	}
+	
+	public String runQuerySpatialFilter (String sqlStmt, double radius, double lat, double lon) {
+		ResultSet rs = null;
+		String result = "[]";
+		if (this.connection == null) {
+			return result;
+		}
+		try {
+			PreparedStatement pstmt = this.connection.prepareStatement(sqlStmt);
+			rs = pstmt.executeQuery();
+			result = convertLocationToJSONSpatialFilter(rs, radius, lat, lon);
+			pstmt.close();
+			return result;
+		}catch (SQLException ex) {
+			ex.printStackTrace();
+			return result;
+		}
 	}
 	
 	public String runQuery (String sqlStmt, String table) {
@@ -347,6 +411,29 @@ public class DatabaseHandler {
 			return null;
 		}
 	}
+	
+	//return distances in miles.
+	public static double HaverSineDistance(double lat1, double lng1, double lat2, double lng2) 
+	{
+	    // http://en.wikipedia.org/wiki/Haversine_formula
+		double EARTH_RADIUS = 3958.75;
+
+	    // convert to radians
+	    lat1 = Math.toRadians(lat1);
+	    lng1 = Math.toRadians(lng1);
+	    lat2 = Math.toRadians(lat2);
+	    lng2 = Math.toRadians(lng2);
+
+	    double dlon = lng2 - lng1;
+	    double dlat = lat2 - lat1;
+
+	    double a = Math.pow((Math.sin(dlat/2)),2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(dlon/2),2);
+
+	    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+	    return EARTH_RADIUS * c;
+	}  
+	
 	/*
 	 * this is to test whether the java program can write data to database
 	 */

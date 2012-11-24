@@ -121,6 +121,22 @@ public class QueryServlet extends HttpServlet{
 	        	String pid = req.getParameter("id");
 	        	String result = handler.queryFriendsPastLocations(pid);
 	        	out.write(result);
+	        }else if (action.compareTo("queryFriendsLocationsWithinMiles")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPastLocations
+	        	String pid = req.getParameter("id");
+	        	String radius = req.getParameter("radius");
+	        	String lat = req.getParameter("lat");
+	        	String lon = req.getParameter("lon");
+	        	String result = handler.queryFriendsLocationsWithinMiles(pid, radius, lat, lon);
+	        	out.write(result);
+	        }else if (action.compareTo("queryFriendsPastLocationsWithinMiles")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPastLocations
+	        	String pid = req.getParameter("id");
+	        	String radius = req.getParameter("radius");
+	        	String lat = req.getParameter("lat");
+	        	String lon = req.getParameter("lon");
+	        	String result = handler.queryFriendsPastLocationsWithinMiles(pid, radius, lat, lon);
+	        	out.write(result);
 	        }else if (action.compareTo("findAllFriends")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?id=12&action=findAllFriends
 	        	String pid = req.getParameter("id");
