@@ -106,10 +106,20 @@ public class QueryServlet extends HttpServlet{
 	        	String pid = req.getParameter("id");
 	        	String result = handler.queryPastLocations(pid);
 	        	out.write(result);
-	        }else if (action.compareTo("queryFriendsLocations")==0){
+	        } else if (action.compareTo("queryCurrentLocations")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPastLocations
+	        	String pid = req.getParameter("id");
+	        	String result = handler.queryCurrentLocations(pid);
+	        	out.write(result);
+	        } else if (action.compareTo("queryFriendsLocations")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPastLocations
 	        	String pid = req.getParameter("id");
 	        	String result = handler.queryFriendsLocations(pid);
+	        	out.write(result);
+	        }else if (action.compareTo("queryFriendsPastLocations")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPastLocations
+	        	String pid = req.getParameter("id");
+	        	String result = handler.queryFriendsPastLocations(pid);
 	        	out.write(result);
 	        }else if (action.compareTo("findAllFriends")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?id=12&action=findAllFriends

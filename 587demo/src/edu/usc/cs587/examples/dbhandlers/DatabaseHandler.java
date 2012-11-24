@@ -215,7 +215,21 @@ public class DatabaseHandler {
 		return rs;
 	}
 	
+	public String queryCurrentLocations(String id){
+		String table = "LOCATION";
+		String sqlStmt =  "SELECT * FROM(SELECT * FROM "+table+" where pid ="+id +" ORDER BY UPDATED_TIME DESC) where rownum < 2";
+		String rs = runQuery (sqlStmt, table);
+		return rs;
+	}
+	
 	public String queryFriendsLocations(String id){
+		String table = "LOCATION";
+		String sqlStmt =  "SELECT l.PID, l.long_int, l.lat_int, l.updated_time FROM LOCATION l, (SELECT MAX(updated_time) as updated_time,PID FROM location WHERE PID IN (select PID2 from RELATIONSHIP WHERE PID1="+id+") GROUP by PID) loc where l.updated_time = loc.updated_time and l.pid = loc.pid";
+		String rs = runQuery (sqlStmt, table);
+		return rs;
+	}
+	
+	public String queryFriendsPastLocations(String id){
 		String table = "LOCATION";
 		String sqlStmt =  "SELECT * FROM "+table+" WHERE PID IN (select PID2 from RELATIONSHIP WHERE PID1="+id+")";
 		String rs = runQuery (sqlStmt, table);
