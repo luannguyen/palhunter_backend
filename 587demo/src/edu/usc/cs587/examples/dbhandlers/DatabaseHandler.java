@@ -280,7 +280,17 @@ public class DatabaseHandler {
 	
 	public String queryKNN(String id, String kfriends, String lat, String lon){
 		String table = "LOCATION";
-		String sqlStmt =  "SELECT l.PID, l.long_int, l.lat_int, l.updated_time FROM LOCATION l, (SELECT MAX(updated_time) as updated_time,PID FROM location WHERE PID IN (select PID2 from RELATIONSHIP WHERE PID1="+id+") GROUP by PID) loc where l.updated_time = loc.updated_time and l.pid = loc.pid";
+		String sqlStmt =  "SELECT l.PID, l.long_int, l.lat_int, l.updated_time, p.FIRST_NAME, p.LAST_NAME, p.USERNAME FROM LOCATION l,PEOPLE p, (SELECT MAX(updated_time) as updated_time,PID FROM location WHERE PID IN (select PID2 from RELATIONSHIP WHERE PID1="+id+") GROUP by PID) loc where l.updated_time = loc.updated_time and l.pid = loc.pid and p.pid = loc.pid";
+		int k_friends = Integer.parseInt(kfriends);
+		double lat_d = Integer.parseInt(lat)*0.000001;
+		double lon_d = Integer.parseInt(lon)*0.000001;
+		String rs = runQuerySpatialKNN (sqlStmt, k_friends, lat_d, lon_d);
+		return rs;
+	}
+	
+	public String queryKNNUsers(String id, String kfriends, String lat, String lon){
+		String table = "LOCATION";
+		String sqlStmt =  "SELECT l.PID, l.long_int, l.lat_int, l.updated_time, p.FIRST_NAME, p.LAST_NAME, p.USERNAME FROM LOCATION l,PEOPLE p, (SELECT MAX(updated_time) as updated_time,PID FROM location WHERE PID !="+id+" GROUP by PID) loc where l.updated_time = loc.updated_time and l.pid = loc.pid and p.pid = loc.pid";
 		int k_friends = Integer.parseInt(kfriends);
 		double lat_d = Integer.parseInt(lat)*0.000001;
 		double lon_d = Integer.parseInt(lon)*0.000001;
@@ -387,6 +397,9 @@ public class DatabaseHandler {
 				data[i] += "\"PID\":\""+rs.getInt("PID")+"\"";
 				data[i] += ",\"LONG_INT\":\""+rs.getInt("LONG_INT")+"\"";
 				data[i] += ",\"LAT_INT\":\""+rs.getInt("LAT_INT")+"\"";
+				data[i] += ",\"FIRST_NAME\":\""+rs.getString("FIRST_NAME")+"\"";
+				data[i] += ",\"LAST_NAME\":\""+rs.getString("LAST_NAME")+"\"";
+				data[i] += ",\"USERNAME\":\""+rs.getString("USERNAME")+"\"";
 				data[i] += ",\"UPDATED_TIME\":\""+rs.getLong("UPDATED_TIME")+"\"";
 				data[i] +="}";
 				ispicked[i] = false;
@@ -395,7 +408,11 @@ public class DatabaseHandler {
 			double[] sortedDistances = new double[i];
 			for(int j=0;j<i;j++){sortedDistances[j]=Distances[j];}
 			Arrays.sort(sortedDistances);
-			for(int j=0;j<kfriends;j++){
+			
+			int num_return = kfriends;
+			if(num_return>i)
+				num_return=i;
+			for(int j=0;j<num_return;j++){
 				double d = sortedDistances[i-1-j];
 				for(int z=0;z<i;z++){
 					if(Distances[z]==d && !ispicked[z]){

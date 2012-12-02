@@ -152,6 +152,14 @@ public class QueryServlet extends HttpServlet{
 	        	String lon = req.getParameter("lon");
 	        	String result = handler.queryKNN(pid, kfriends, lat, lon);
 	        	out.write(result);
+	        }else if (action.compareTo("queryKNNUsers")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPastLocations
+	        	String pid = req.getParameter("id");
+	        	String kfriends = req.getParameter("kfriends");
+	        	String lat = req.getParameter("lat");
+	        	String lon = req.getParameter("lon");
+	        	String result = handler.queryKNNUsers(pid, kfriends, lat, lon);
+	        	out.write(result);
 	        }else if (action.compareTo("queryFriendsPastLocationsWithinMiles")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPastLocations
 	        	String pid = req.getParameter("id");
