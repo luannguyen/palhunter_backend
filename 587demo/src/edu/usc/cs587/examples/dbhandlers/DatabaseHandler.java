@@ -3,11 +3,13 @@
  */
 package edu.usc.cs587.examples.dbhandlers;
 
+import java.lang.reflect.Array;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import oracle.jdbc.OracleConnection;
@@ -123,11 +125,34 @@ public class DatabaseHandler {
 		}
 	}
 	
+	public boolean insertNewPeopleToDB(int pid, String first_name, String last_name, long created_date, String username, String password) {
+		if (this.connection == null) {
+			return false;
+		}
+		String sqlStmt = "INSERT INTO PEOPLE(PID,FIRST_NAME, LAST_NAME,CREATED_TIME,USERNAME, PASSWORD) VALUES (?,?,?,?,?,?)";
+		try {
+			PreparedStatement pstmt = this.connection.prepareStatement(sqlStmt);
+			
+			pstmt.setInt(1, pid);
+			pstmt.setString(2, first_name);
+			pstmt.setString(3, last_name);
+			pstmt.setLong(4, created_date);
+			pstmt.setString(5, first_name);
+			pstmt.setString(6, last_name);
+			pstmt.execute();
+			pstmt.close();
+			return true;
+		}catch (SQLException ex) {
+			ex.printStackTrace();
+			return false;
+		}
+	}
+	
 	public boolean insertPeopleToDB(int pid, String first_name, String last_name, long created_date) {
 		if (this.connection == null) {
 			return false;
 		}
-		String sqlStmt = "INSERT INTO PEOPLE VALUES (?,?,?,?)";
+		String sqlStmt = "INSERT INTO PEOPLE(PID,FIRST_NAME, LAST_NAME,CREATED_TIME) VALUES (?,?,?,?)";
 		try {
 			PreparedStatement pstmt = this.connection.prepareStatement(sqlStmt);
 			
@@ -168,6 +193,13 @@ public class DatabaseHandler {
 	public String queryPeopleName(String first_name, String last_name){
 		String table = "PEOPLE";
 		String sqlStmt =  "SELECT * FROM "+table+" where first_name ='"+first_name+"' and last_name ='"+last_name+"'";
+		String rs = runQuery (sqlStmt, table);
+		return rs;
+	}
+	
+	public String queryPeopleUsername(String username, String password){
+		String table = "PEOPLE";
+		String sqlStmt =  "SELECT * FROM "+table+" where USERNAME ='"+username+"' and PASSWORD ='"+password+"'";
 		String rs = runQuery (sqlStmt, table);
 		return rs;
 	}
@@ -243,6 +275,16 @@ public class DatabaseHandler {
 		double lat_d = Integer.parseInt(lat)*0.000001;
 		double lon_d = Integer.parseInt(lon)*0.000001;
 		String rs = runQuerySpatialFilter (sqlStmt, radius_d, lat_d, lon_d);
+		return rs;
+	}
+	
+	public String queryKNN(String id, String kfriends, String lat, String lon){
+		String table = "LOCATION";
+		String sqlStmt =  "SELECT l.PID, l.long_int, l.lat_int, l.updated_time FROM LOCATION l, (SELECT MAX(updated_time) as updated_time,PID FROM location WHERE PID IN (select PID2 from RELATIONSHIP WHERE PID1="+id+") GROUP by PID) loc where l.updated_time = loc.updated_time and l.pid = loc.pid";
+		int k_friends = Integer.parseInt(kfriends);
+		double lat_d = Integer.parseInt(lat)*0.000001;
+		double lon_d = Integer.parseInt(lon)*0.000001;
+		String rs = runQuerySpatialKNN (sqlStmt, k_friends, lat_d, lon_d);
 		return rs;
 	}
 	
@@ -327,6 +369,54 @@ public class DatabaseHandler {
 		return result;
 	}
 	
+	public String convertLocationToJSONSpatialKNN(ResultSet rs, int kfriends, double lat, double lon){
+		if(rs == null) return "[]";
+		String result = "[";
+		try {
+			double[] Distances = new double[1000];
+			
+			String[] data = new String[1000];
+			boolean[] ispicked = new boolean[1000];
+			int i=0;
+			while (rs != null && rs.next()) {
+				double friend_lat = rs.getInt("LAT_INT") * 0.000001;
+				double friend_lon = rs.getInt("LONG_INT") * 0.000001;
+				Distances[i]=HaverSineDistance(friend_lat, friend_lon, lat, lon);
+				data[i]="";
+				data[i] +="{";
+				data[i] += "\"PID\":\""+rs.getInt("PID")+"\"";
+				data[i] += ",\"LONG_INT\":\""+rs.getInt("LONG_INT")+"\"";
+				data[i] += ",\"LAT_INT\":\""+rs.getInt("LAT_INT")+"\"";
+				data[i] += ",\"UPDATED_TIME\":\""+rs.getLong("UPDATED_TIME")+"\"";
+				data[i] +="}";
+				ispicked[i] = false;
+				i++;
+			}
+			double[] sortedDistances = new double[i];
+			for(int j=0;j<i;j++){sortedDistances[j]=Distances[j];}
+			Arrays.sort(sortedDistances);
+			for(int j=0;j<kfriends;j++){
+				double d = sortedDistances[i-1-j];
+				for(int z=0;z<i;z++){
+					if(Distances[z]==d && !ispicked[z]){
+						result+=data[z]+",";
+						ispicked[z] = true;
+						break;
+					}
+				}
+			}
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(result.length()>2)
+			result = result.substring(0, result.length()-1);
+		result+="]";
+		return result;
+	}
+	
 	public String convertAggregateToJSON(ResultSet rs){
 		if(rs == null) return "[]";
 		String result = "[";
@@ -356,6 +446,24 @@ public class DatabaseHandler {
 			PreparedStatement pstmt = this.connection.prepareStatement(sqlStmt);
 			rs = pstmt.executeQuery();
 			result = convertLocationToJSONSpatialFilter(rs, radius, lat, lon);
+			pstmt.close();
+			return result;
+		}catch (SQLException ex) {
+			ex.printStackTrace();
+			return result;
+		}
+	}
+	
+	public String runQuerySpatialKNN (String sqlStmt, int kfriends, double lat, double lon) {
+		ResultSet rs = null;
+		String result = "[]";
+		if (this.connection == null) {
+			return result;
+		}
+		try {
+			PreparedStatement pstmt = this.connection.prepareStatement(sqlStmt);
+			rs = pstmt.executeQuery();
+			result = convertLocationToJSONSpatialKNN(rs, kfriends, lat, lon);
 			pstmt.close();
 			return result;
 		}catch (SQLException ex) {

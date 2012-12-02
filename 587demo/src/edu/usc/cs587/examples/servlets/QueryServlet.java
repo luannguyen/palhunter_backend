@@ -67,6 +67,21 @@ public class QueryServlet extends HttpServlet{
 	        		out.write("Successfully insert!");
 	        	else
 	        		out.write("Failed to insert!");
+	        } else if(action.compareTo("insertNewPeople")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=2&first_name=yuwei&last_name=tan&created_time=1347774599449&action=insertPeople
+				String first_name = req.getParameter("first_name");
+				String last_name = req.getParameter("last_name");
+				String username = req.getParameter("username");
+				String password = req.getParameter("password");
+				String pid = req.getParameter("id");
+				int id = Integer.parseInt(pid);
+				long created_date = Long.parseLong(req.getParameter("created_time"));
+				//System.out.println(created_date);
+				boolean success = handler.insertNewPeopleToDB(id, first_name, last_name,created_date, username, password);
+	        	if(success)
+	        		out.write("Successfully insert!");
+	        	else
+	        		out.write("Failed to insert!");
 	        } else if (action.compareTo("addFriend")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?action=addFriend&pid1=1&pid2=4
 	        	String pid1 = req.getParameter("pid1");
@@ -129,6 +144,14 @@ public class QueryServlet extends HttpServlet{
 	        	String lon = req.getParameter("lon");
 	        	String result = handler.queryFriendsLocationsWithinMiles(pid, radius, lat, lon);
 	        	out.write(result);
+	        }else if (action.compareTo("queryKNN")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPastLocations
+	        	String pid = req.getParameter("id");
+	        	String kfriends = req.getParameter("kfriends");
+	        	String lat = req.getParameter("lat");
+	        	String lon = req.getParameter("lon");
+	        	String result = handler.queryKNN(pid, kfriends, lat, lon);
+	        	out.write(result);
 	        }else if (action.compareTo("queryFriendsPastLocationsWithinMiles")==0){
 	        	//example: http://localhost:8080/587demo/QueryServlet?id=4&action=queryPastLocations
 	        	String pid = req.getParameter("id");
@@ -160,6 +183,12 @@ public class QueryServlet extends HttpServlet{
 				String first_name = req.getParameter("first_name");
 				String last_name = req.getParameter("last_name");
 	        	String result = handler.queryPeopleName(first_name,last_name);
+	        	out.write(result);
+	        } else if (action.compareTo("queryPeopleUsername")==0){
+	        	//example: http://localhost:8080/587demo/QueryServlet?first_name=yuwei&last_name=tan&action=queryPeopleName
+				String username = req.getParameter("username");
+				String password = req.getParameter("password");
+	        	String result = handler.queryPeopleUsername(username,password);
 	        	out.write(result);
 	        } 
 			
