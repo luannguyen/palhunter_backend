@@ -413,7 +413,7 @@ public class DatabaseHandler {
 			if(num_return>i)
 				num_return=i;
 			for(int j=0;j<num_return;j++){
-				double d = sortedDistances[i-1-j];
+				double d = sortedDistances[j];
 				for(int z=0;z<i;z++){
 					if(Distances[z]==d && !ispicked[z]){
 						result+=data[z]+",";
